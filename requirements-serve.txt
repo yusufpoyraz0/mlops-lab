@@ -3,3 +3,9 @@ scikit-learn
 pandas
 fastapi
 uvicorn
+mlflow-skinny
+scikit-learn
+pandas
+fastapi
+uvicorn
+skops

@@ -1,5 +1,6 @@
 """Bölüm 7-9: Birden fazla deney çalıştır, MLflow'da izle, en iyisini Registry'ye kaydet."""
 import itertools
+import shutil
 
 import mlflow
 import mlflow.sklearn
@@ -49,5 +50,6 @@ MlflowClient().set_registered_model_alias(MODEL_NAME, "production", version.vers
 print(f"\nEn iyi run: {best['run_id']} (f1={best['f1']:.3f}) -> {MODEL_NAME} v{version.version} [production]")
 
 # Docker imajına girecek yerel kopya (Bölüm 10-11)
+shutil.rmtree("model", ignore_errors=True)  # eski kopya varsa sil, yoksa save_model hata verir
 mlflow.sklearn.save_model(best["model"], "model", skops_trusted_types=TRUSTED)
 print("Model 'model/' klasörüne kaydedildi.")
