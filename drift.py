@@ -1,8 +1,10 @@
 """Bölüm 14: logs/predictions.jsonl içindeki canlı girdileri eğitim verisiyle karşılaştır.
 
-Çıkış kodu: 0 = drift yok, 1 = drift var (Bölüm 15'te yeniden eğitimi tetiklemek için kullanılır).
+Çıkış kodu: 0 = drift yok (ya da yeterli veri yok), 10 = drift var (retrain.py bunu kullanır).
+Başka bir kod beklenmeyen bir hata demektir.
 """
 import sys
+from pathlib import Path
 
 import pandas as pd
 from scipy.stats import ks_2samp
@@ -14,6 +16,10 @@ MIN_ROWS = 20        # çok az istekle karar verme
 
 ref, _ = load_iris(as_frame=True, return_X_y=True)
 ref = ref.rename(columns=lambda c: c.replace(" (cm)", "").replace(" ", "_"))
+
+if not Path(LOG_FILE).exists():
+    print("Henüz log yok. Önce API'ye istek gönder.")
+    sys.exit(0)
 
 live = pd.read_json(LOG_FILE, lines=True)
 if len(live) < MIN_ROWS:
@@ -28,4 +34,4 @@ for col in ref.columns:
     print(f"{col:<14} eğitim ort={ref[col].mean():.2f}  canlı ort={live[col].mean():.2f}  p={p:.4f}  {flag}")
 
 print("\nSonuç:", "DRIFT VAR" if drifted else "drift yok")
-sys.exit(1 if drifted else 0)
+sys.exit(10 if drifted else 0)

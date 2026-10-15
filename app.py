@@ -16,7 +16,6 @@ FEATURES = [
 ]
 CLASSES = ["setosa", "versicolor", "virginica"]
 LOG_FILE = Path("logs/predictions.jsonl")
-LOG_FILE.parent.mkdir(exist_ok=True)
 
 model = mlflow.sklearn.load_model("model")
 app = FastAPI(title="Iris MLOps Lab")
@@ -41,7 +40,8 @@ def predict(f: Flower):
         columns=FEATURES,
     )
     idx = int(model.predict(row)[0])
-    # Drift kontrolü için girdileri ve tahmini kaydet
+    # Drift kontrolü için girdileri ve tahmini kaydet (klasör silinmişse yeniden oluştur)
+    LOG_FILE.parent.mkdir(exist_ok=True)
     with LOG_FILE.open("a") as fh:
         fh.write(json.dumps({"ts": time.time(), **f.model_dump(), "prediction": idx}) + "\n")
     return {"class_id": idx, "class_name": CLASSES[idx]}
